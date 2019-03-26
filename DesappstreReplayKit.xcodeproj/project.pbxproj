@@ -8,20 +8,26 @@
 
 /* Begin PBXBuildFile section */
 		9153420C224AC24D0023C72A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9153420B224AC24D0023C72A /* AppDelegate.swift */; };
-		9153420E224AC24D0023C72A /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9153420D224AC24D0023C72A /* ViewController.swift */; };
 		91534211224AC24D0023C72A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9153420F224AC24D0023C72A /* Main.storyboard */; };
 		91534213224AC2500023C72A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 91534212224AC2500023C72A /* Assets.xcassets */; };
 		91534216224AC2500023C72A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 91534214224AC2500023C72A /* LaunchScreen.storyboard */; };
+		91534222224AC2EA0023C72A /* ReplayKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 91534221224AC2EA0023C72A /* ReplayKit.framework */; };
+		91534224224AD08C0023C72A /* RecorderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91534223224AD08C0023C72A /* RecorderViewController.swift */; };
+		91534226224AD7F80023C72A /* AppColors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 91534225224AD7F80023C72A /* AppColors.xcassets */; };
+		91534228224AD8770023C72A /* AppImages.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 91534227224AD8770023C72A /* AppImages.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		91534208224AC24D0023C72A /* DesappstreReplayKit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DesappstreReplayKit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9153420B224AC24D0023C72A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		9153420D224AC24D0023C72A /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		91534210224AC24D0023C72A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		91534212224AC2500023C72A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		91534215224AC2500023C72A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		91534217224AC2500023C72A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		91534221224AC2EA0023C72A /* ReplayKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ReplayKit.framework; path = System/Library/Frameworks/ReplayKit.framework; sourceTree = SDKROOT; };
+		91534223224AD08C0023C72A /* RecorderViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecorderViewController.swift; sourceTree = "<group>"; };
+		91534225224AD7F80023C72A /* AppColors.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = AppColors.xcassets; sourceTree = "<group>"; };
+		91534227224AD8770023C72A /* AppImages.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = AppImages.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -29,6 +35,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				91534222224AC2EA0023C72A /* ReplayKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -40,6 +47,7 @@
 			children = (
 				9153420A224AC24D0023C72A /* DesappstreReplayKit */,
 				91534209224AC24D0023C72A /* Products */,
+				91534220224AC2EA0023C72A /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -54,14 +62,48 @@
 		9153420A224AC24D0023C72A /* DesappstreReplayKit */ = {
 			isa = PBXGroup;
 			children = (
-				9153420B224AC24D0023C72A /* AppDelegate.swift */,
-				9153420D224AC24D0023C72A /* ViewController.swift */,
-				9153420F224AC24D0023C72A /* Main.storyboard */,
-				91534212224AC2500023C72A /* Assets.xcassets */,
-				91534214224AC2500023C72A /* LaunchScreen.storyboard */,
 				91534217224AC2500023C72A /* Info.plist */,
+				9153420B224AC24D0023C72A /* AppDelegate.swift */,
+				9153421F224AC2950023C72A /* Resources */,
+				9153421E224AC28C0023C72A /* Views */,
+				9153421D224AC27D0023C72A /* Controllers */,
 			);
 			path = DesappstreReplayKit;
+			sourceTree = "<group>";
+		};
+		9153421D224AC27D0023C72A /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				91534223224AD08C0023C72A /* RecorderViewController.swift */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
+		9153421E224AC28C0023C72A /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				9153420F224AC24D0023C72A /* Main.storyboard */,
+				91534214224AC2500023C72A /* LaunchScreen.storyboard */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		9153421F224AC2950023C72A /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				91534212224AC2500023C72A /* Assets.xcassets */,
+				91534225224AD7F80023C72A /* AppColors.xcassets */,
+				91534227224AD8770023C72A /* AppImages.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		91534220224AC2EA0023C72A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				91534221224AC2EA0023C72A /* ReplayKit.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -123,8 +165,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				91534216224AC2500023C72A /* LaunchScreen.storyboard in Resources */,
+				91534226224AD7F80023C72A /* AppColors.xcassets in Resources */,
 				91534213224AC2500023C72A /* Assets.xcassets in Resources */,
 				91534211224AC24D0023C72A /* Main.storyboard in Resources */,
+				91534228224AD8770023C72A /* AppImages.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -135,7 +179,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9153420E224AC24D0023C72A /* ViewController.swift in Sources */,
+				91534224224AD08C0023C72A /* RecorderViewController.swift in Sources */,
 				9153420C224AC24D0023C72A /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
