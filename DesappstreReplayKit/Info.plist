@@ -41,5 +41,7 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Usamos la cámara para ver tus reacciones mientras juegas. ¡Sonrie!</string>
 </dict>
 </plist>

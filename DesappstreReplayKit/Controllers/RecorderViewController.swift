@@ -19,6 +19,8 @@ internal class RecorderViewController: UIViewController
     @IBOutlet private weak var buttonMicrophone: UIButton!
     ///
     @IBOutlet private weak var buttonCamera: UIButton!
+    ///
+    @IBOutlet private weak var buttonGoLive: UIButton!
 
     ///
     private var isScreenRecording: Bool!
@@ -27,6 +29,15 @@ internal class RecorderViewController: UIViewController
         {
             let status = self.isScreenRecording ? RecorderViewController.Status.on : RecorderViewController.Status.off
             self.toogleButton(self.buttonRecord, to: status)
+        }
+    }
+
+    ///
+    private var broadcastController: RPBroadcastController?
+    {
+        didSet
+        {
+            self.broadcastController?.delegate = self
         }
     }
 
@@ -39,6 +50,7 @@ internal class RecorderViewController: UIViewController
         super.viewDidLoad()
 
         self.isScreenRecording = false
+        self.onAir = false
 
         self.prepareUI()
     }
@@ -149,6 +161,21 @@ internal class RecorderViewController: UIViewController
     /**
 
     */
+    @IBAction private func handleGoLiveButtonTap(sender: UIButton) -> Void
+    {
+        if let broadcastController = self.broadcastController, broadcastController.isBroadCasting
+        {
+             self.stopScreenBroadcasting()
+        }
+        else
+        {
+            self.requestScreenBroadcasting()
+        }
+    }
+
+    /**
+
+    */
     @IBAction private func handleColoredButtonTap(sender: UIButton) -> Void
     {
         let newAlpha = sender.alpha == 1.0 ? 0.25 : 1.0
@@ -211,6 +238,72 @@ extension RecorderViewController
             self.present(previewController, animated: true, completion: nil)
         }
     }
+
+    private func requestScreenBroadcasting() -> Void
+    {
+        RPBroadcastActivityViewController.load(handler: { (activityViewController: RPBroadcastActivityViewController?, error: Error?) -> Void in 
+            if let error = error
+            {
+                print("Error al iniciar la emisión.")
+                print(error.localizedDescription)
+            }
+
+            guard let activityViewController = activityViewController else
+            {
+                return
+            }
+
+            if UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiom.pad 
+            {
+                activityViewController.modalPresentationStyle = UIModalPresentationStyle.popover
+                activityViewController.popoverPresentationController?.sourceRect = CGRect.zero
+                activityViewController.popoverPresentationController?.sourceView = self.buttonGoLive
+            }
+
+            activityViewController.delegate = self
+
+            self.present(activityViewController, animated: true, completion: nil)
+        })
+    }
+
+    /**
+
+    */
+    private func startScreenBroadcasting() -> Void
+    {
+        guard let broadcastController = self.broadcastController else
+        {
+            return 
+        }
+
+        broadcastController.startBroadcast(handler: { (error: Error?) -> Void in 
+            if let error = error
+            {
+                print("Retransmisión no disponible.")
+                print(error.localizedDescription)
+            }
+            else
+            {
+                print("Retransmisión disponible en \(broadcastController.broadcastURL.absoluteString)")
+            }
+        })
+    }
+
+    private func stopScreenBroadcasting() -> Void
+    {
+        guard let broadcastController = self.broadcastController else
+        {
+            return 
+        }
+
+        broadcastController.finishBroadcast(handler: { (error: Error?) -> Void in 
+            if let error = error 
+            {
+                print("Algo pasa al devolver la conexión a nuestros estudio centrales...")
+                print(error.localizedDescription)
+            }
+        })
+    }
 }
 
 //
@@ -237,5 +330,59 @@ extension RecorderViewController: RPPreviewViewControllerDelegate
         })
 
         previewController.dismiss(animated: true, completion: nil)
+    }
+}
+
+//
+// MARK: - RPBroadcastActivityViewControllerDelegate Protocol
+//
+
+extension RecorderViewController: RPBroadcastActivityViewControllerDelegate
+{
+    /**
+
+    */
+    func broadcastActivityViewController(_ broadcastActivityViewController: RPBroadcastActivityViewController, didFinishWith broadcastController: RPBroadcastController?, error: Error?) -> Void
+    {
+        if let error = error
+        {
+            print("Cerrando la selección de servicios de broadcasting...")
+            print(error.localizedDescription)
+        }
+
+        broadcastActivityViewController.dismiss(animated: true, completion: nil)
+
+        // Guardamos la referencia para poder iniciar 
+        // o detener la retransmisión.
+        self.broadcastController = broadcastController
+
+        self.startScreenBroadcasting()        
+    }
+}
+
+//
+// MARK: - RPBroadcastControllerDelegate Protocol
+//
+
+extension RecorderViewController: RPBroadcastControllerDelegate
+{
+    /**
+
+    */
+    func broadcastController(_ broadcastController: RPBroadcastController, didFinishWithError error: Error?) -> Void
+    {
+        if let error = error
+        {
+            print("Error durante la retransmisión.")
+            print(error.localizedDescription)
+        }
+    }
+
+    /**
+
+    */
+    func broadcastController(_ broadcastController: RPBroadcastController, didUpdateBroadcast broadcastURL: URL) -> Void
+    {
+        print("Nueva URL, retransmisión ahora disponible en \(broadcastURL.absoluteString)")
     }
 }
