@@ -50,7 +50,6 @@ internal class RecorderViewController: UIViewController
         super.viewDidLoad()
 
         self.isScreenRecording = false
-        self.onAir = false
 
         self.prepareUI()
     }
@@ -72,6 +71,10 @@ internal class RecorderViewController: UIViewController
         self.viewFrontCamera.layer.shadowRadius = 20.0
         self.viewFrontCamera.layer.shadowOffset = CGSize.zero
         self.viewFrontCamera.layer.shadowColor = UIColor(named: "ShadowColor")?.cgColor
+        
+        self.buttonCamera.tintColor = RPScreenRecorder.shared().isCameraEnabled ? UIColor(named: "EnableColor") : UIColor(named: "DisableColor")
+        self.buttonGoLive.tintColor = UIColor(named: "DisableColor")
+        self.buttonMicrophone.tintColor = UIColor(named: "DisableColor")
     }
 
     //
@@ -101,7 +104,7 @@ internal class RecorderViewController: UIViewController
     */
     private func animateButton(_ button: UIButton, alphaChangeTo alpha: CGFloat) -> Void
     {
-        let animator = UIViewPropertyAnimator(duration: 0.35, curve: .easeIn)
+        let animator = UIViewPropertyAnimator(duration: 0.25, curve: .easeIn)
 
         animator.addAnimations() {
             button.alpha = alpha
@@ -136,8 +139,13 @@ internal class RecorderViewController: UIViewController
     */
     @IBAction private func handleMicrophoneButtonTap(sender: UIButton) -> Void
     {
+        guard !RPScreenRecorder.shared().isRecording else
+        {
+            return
+        }
+        
         RPScreenRecorder.shared().isMicrophoneEnabled.toggle()
-
+        
         let status = RPScreenRecorder.shared().isMicrophoneEnabled ? RecorderViewController.Status.on : RecorderViewController.Status.off
         self.toogleButton(sender, to: status)
     }
@@ -147,15 +155,20 @@ internal class RecorderViewController: UIViewController
     */
     @IBAction private func handleCameraButtonTap(sender: UIButton) -> Void
     {
-        RPScreenRecorder.shared().isCameraEnabled.toggle()
-        
-        if let cameraPreviewView = RPScreenRecorder.shared().cameraPreviewView
+        guard !RPScreenRecorder.shared().isRecording else
         {
-            self.viewFrontCamera.addSubview(cameraPreviewView)
+            return
         }
+        
+        RPScreenRecorder.shared().isCameraEnabled.toggle()
 
         let status = RPScreenRecorder.shared().isCameraEnabled ? RecorderViewController.Status.on : RecorderViewController.Status.off
         self.toogleButton(sender, to: status)
+        
+        if !RPScreenRecorder.shared().isCameraEnabled
+        {
+            self.viewFrontCamera.subviews.forEach({ $0.removeFromSuperview() })
+        }
     }
 
     /**
@@ -163,7 +176,7 @@ internal class RecorderViewController: UIViewController
     */
     @IBAction private func handleGoLiveButtonTap(sender: UIButton) -> Void
     {
-        if let broadcastController = self.broadcastController, broadcastController.isBroadCasting
+        if let broadcastController = self.broadcastController, broadcastController.isBroadcasting
         {
              self.stopScreenBroadcasting()
         }
@@ -178,7 +191,7 @@ internal class RecorderViewController: UIViewController
     */
     @IBAction private func handleColoredButtonTap(sender: UIButton) -> Void
     {
-        let newAlpha = sender.alpha == 1.0 ? 0.25 : 1.0
+        let newAlpha = sender.alpha == 1.0 ? 0.15 : 1.0
         self.animateButton(sender, alphaChangeTo: CGFloat(newAlpha))
     }
 }
@@ -204,6 +217,15 @@ extension RecorderViewController
             }
             else
             {
+                if let cameraPreviewView = RPScreenRecorder.shared().cameraPreviewView, RPScreenRecorder.shared().isCameraEnabled
+                {
+                    DispatchQueue.main.async
+                    {
+                        cameraPreviewView.frame = self.viewFrontCamera.bounds
+                        self.viewFrontCamera.addSubview(cameraPreviewView)
+                    }
+                }
+                
                 print("Recording...")
             }
         }
