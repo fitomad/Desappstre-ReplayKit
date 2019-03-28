@@ -1,28 +1,29 @@
 import UIKit
 import Foundation
 import ReplayKit
+import AudioToolbox
 
 internal class RecorderViewController: UIViewController
 {
-    ///
+    /// Estado de los botones
     private enum Status
     {
         case on
         case off
     }
 
-    ///
+    /// Aquí mostramos las imágenes de la cámara
     @IBOutlet private weak var viewFrontCamera: UIView!
-    ///
+    /// Inicio o detine la grabación
     @IBOutlet private weak var buttonRecord: UIButton!
-    ///
+    /// Activa o desactiva el micrófono
     @IBOutlet private weak var buttonMicrophone: UIButton!
-    ///
+    /// Activa o desactiva la cámara
     @IBOutlet private weak var buttonCamera: UIButton!
-    ///
+    /// Emisión en vivo
     @IBOutlet private weak var buttonGoLive: UIButton!
 
-    ///
+    /// Si estamos grabado la pantalla o no
     private var isScreenRecording: Bool!
     {
         didSet
@@ -32,7 +33,7 @@ internal class RecorderViewController: UIViewController
         }
     }
 
-    ///
+    /// El controlador de broadcasting
     private var broadcastController: RPBroadcastController?
     {
         didSet
@@ -45,6 +46,9 @@ internal class RecorderViewController: UIViewController
     // MARK: - Life Cycle
     //
 
+    /**
+        Nos preparamos...
+    */
     override internal func viewDidLoad() -> Void
     {
         super.viewDidLoad()
@@ -59,7 +63,7 @@ internal class RecorderViewController: UIViewController
     //
 
     /**
-
+        Preparamos el interface de usuario
     */
     private func prepareUI() -> Void
     {
@@ -81,6 +85,10 @@ internal class RecorderViewController: UIViewController
     // MARK: - Animations
     //
 
+    /**
+        Muestra los botones de control de la grabación
+        como activados o desactivados
+    */
     private func toogleButton(_ button: UIButton, to status: RecorderViewController.Status) -> Void
     {
         guard let enabledColor = UIColor(named: "EnableColor"),
@@ -100,7 +108,9 @@ internal class RecorderViewController: UIViewController
     }
 
     /**
+        Animación para los botones de colores.
 
+        Los pone transparente o sin transparencia
     */
     private func animateButton(_ button: UIButton, alphaChangeTo alpha: CGFloat) -> Void
     {
@@ -118,7 +128,7 @@ internal class RecorderViewController: UIViewController
     //
 
     /**
-
+        Controla la grabación de pantalla
     */
     @IBAction private func handleRecordButtonTap(sender: UIButton) -> Void
     {
@@ -135,7 +145,9 @@ internal class RecorderViewController: UIViewController
     }
 
     /**
+        Activa o desactiva el micrófono.
 
+        Una vez comenzada la grabación no se puede modificar.
     */
     @IBAction private func handleMicrophoneButtonTap(sender: UIButton) -> Void
     {
@@ -151,7 +163,9 @@ internal class RecorderViewController: UIViewController
     }
 
     /**
+        Activa o desactiva la cámara.
 
+        Una vez comenzada la grabación no se puede modificar.
     */
     @IBAction private func handleCameraButtonTap(sender: UIButton) -> Void
     {
@@ -172,38 +186,43 @@ internal class RecorderViewController: UIViewController
     }
 
     /**
-
+        Activa o desactiva la emisión en directo
     */
     @IBAction private func handleGoLiveButtonTap(sender: UIButton) -> Void
     {
         if let broadcastController = self.broadcastController, broadcastController.isBroadcasting
         {
-             self.stopScreenBroadcasting()
+            self.toogleButton(sender, to: .off)
+            self.stopScreenBroadcasting()
         }
         else
         {
+            self.toogleButton(sender, to: .on)
             self.requestScreenBroadcasting()
         }
     }
 
     /**
-
+        Acciones sobre los botones de colores.
     */
     @IBAction private func handleColoredButtonTap(sender: UIButton) -> Void
     {
         let newAlpha = sender.alpha == 1.0 ? 0.15 : 1.0
         self.animateButton(sender, alphaChangeTo: CGFloat(newAlpha))
+
+        // Emitimos un sonido
+        AudioServicesPlaySystemSound(1104)
     }
 }
 
 //
-// MARK: - ReplayKit Operations
+// MARK: - ReplayKit Screen Operations
 //
 
 extension RecorderViewController
 {
     /**
-
+        Iniciamos la grabación
     */
     private func startScreenRecording() -> Void
     {
@@ -217,6 +236,8 @@ extension RecorderViewController
             }
             else
             {
+                // Si el usuario ha activa la cámara recogemos 
+                // la vista con la imagen y la añadimos a la vista.
                 if let cameraPreviewView = RPScreenRecorder.shared().cameraPreviewView, RPScreenRecorder.shared().isCameraEnabled
                 {
                     DispatchQueue.main.async
@@ -232,7 +253,7 @@ extension RecorderViewController
     }
 
     /**
-
+        Detenemos la grabación 
     */
     private func stopScreenRecording() -> Void
     {
@@ -260,7 +281,21 @@ extension RecorderViewController
             self.present(previewController, animated: true, completion: nil)
         }
     }
+}
 
+//
+// MARK: - ReplayKit Broadcast Operations
+//
+
+extension RecorderViewController
+{
+    /**
+        Mostramos la *activity view* para que el usuario seleccione el 
+        servicio de broadcasting que prefiere usar.
+
+        Se listan aquellos servicios cuya App esté instalada en nuestro
+        dispositivo.
+    */
     private func requestScreenBroadcasting() -> Void
     {
         RPBroadcastActivityViewController.load(handler: { (activityViewController: RPBroadcastActivityViewController?, error: Error?) -> Void in 
@@ -268,6 +303,8 @@ extension RecorderViewController
             {
                 print("Error al iniciar la emisión.")
                 print(error.localizedDescription)
+
+                self.toogleButton(self.buttonGoLive, to: .off)
             }
 
             guard let activityViewController = activityViewController else
@@ -289,7 +326,8 @@ extension RecorderViewController
     }
 
     /**
-
+        El usuario ha seleccionado el servicio y comienza
+        la emisión
     */
     private func startScreenBroadcasting() -> Void
     {
@@ -311,6 +349,9 @@ extension RecorderViewController
         })
     }
 
+    /**
+        Terminamos la emisión en directo
+    */
     private func stopScreenBroadcasting() -> Void
     {
         guard let broadcastController = self.broadcastController else
@@ -324,6 +365,8 @@ extension RecorderViewController
                 print("Algo pasa al devolver la conexión a nuestros estudio centrales...")
                 print(error.localizedDescription)
             }
+
+            self.toogleButton(self.buttonGoLive, to: .off)
         })
     }
 }
@@ -335,7 +378,8 @@ extension RecorderViewController
 extension RecorderViewController: RPPreviewViewControllerDelegate
 {
     /**
-
+        El usuario ha terminado con la vista de edición de
+        la grabación
     */
     func previewControllerDidFinish(_ previewController: RPPreviewViewController) -> Void
     {
@@ -343,7 +387,10 @@ extension RecorderViewController: RPPreviewViewControllerDelegate
     }
 
     /**
+        El usuario ha terminado con la vista de edición de
+        la grabación.
 
+        Podemos ver los activity types.
     */
     func previewController(_ previewController: RPPreviewViewController, didFinishWithActivityTypes activityTypes: Set<String>) -> Void
     {
@@ -362,7 +409,11 @@ extension RecorderViewController: RPPreviewViewControllerDelegate
 extension RecorderViewController: RPBroadcastActivityViewControllerDelegate
 {
     /**
+        El usuario acaba de seleccionar uno de los servicios
+        de broadcasting que tiene instalados en su equipo.
 
+        Nos devuelve un objeto `RPBroadcastController` con el que 
+        se controla la emisión en vivo.
     */
     func broadcastActivityViewController(_ broadcastActivityViewController: RPBroadcastActivityViewController, didFinishWith broadcastController: RPBroadcastController?, error: Error?) -> Void
     {
@@ -389,7 +440,7 @@ extension RecorderViewController: RPBroadcastActivityViewControllerDelegate
 extension RecorderViewController: RPBroadcastControllerDelegate
 {
     /**
-
+        Parece que ha habido un error durante la emisión...
     */
     func broadcastController(_ broadcastController: RPBroadcastController, didFinishWithError error: Error?) -> Void
     {
@@ -401,7 +452,7 @@ extension RecorderViewController: RPBroadcastControllerDelegate
     }
 
     /**
-
+        Se ha actualizado la URL de la emisión
     */
     func broadcastController(_ broadcastController: RPBroadcastController, didUpdateBroadcast broadcastURL: URL) -> Void
     {
